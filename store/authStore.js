@@ -3,18 +3,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../constants/api'; // Adjust the import based on your project structure
 
 export const useAuthStore = create((set) => ({
-    user:null,
-    token:null,
+    user: null,
+    token: null,
     isLoading: false,
 
-    register: async (username,email,password) => {
-        
+    register: async (username, email, password) => {
         set({ isLoading: true });
-        
         try {
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
-                headers:{
+                headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ username, email, password }),
@@ -28,17 +26,17 @@ export const useAuthStore = create((set) => ({
             await AsyncStorage.setItem('token', data.token);
 
             set({ user: data.user, token: data.token, isLoading: false });
-            return { success : true};
+            return { success: true };
         } catch (error) {
             console.error('Registration failed:', error);
             set({ isLoading: false });
-            return { success: false, error: error.message};
+            return { success: false, error: error.message };
         }
     },
 
     login: async (email, password) => {
         set({ isLoading: true });
-        try{
+        try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: {
@@ -57,15 +55,16 @@ export const useAuthStore = create((set) => ({
 
             set({ user: data.user, token: data.token, isLoading: false });
             return { success: true };
-        }catch(error){
+        } catch (error) {
             console.error('Login failed:', error);
-            return { success: false, error: error.message, isLoading: false };
+            set({ isLoading: false });
+            return { success: false, error: error.message };
         }
-    },    
+    },
 
     checkAuth: async () => {
         set({ isLoading: true });
-         try{
+        try {
             const token = await AsyncStorage.getItem('token');
             const userJson = await AsyncStorage.getItem('user');
 
@@ -75,10 +74,10 @@ export const useAuthStore = create((set) => ({
             } else {
                 set({ user: null, token: null, isLoading: false });
             }
-         }catch(error){
+        } catch (error) {
             console.error('Auth check failed:', error);
-            set({ user: null, token: null });
-         }
+            set({ user: null, token: null, isLoading: false });
+        }
     },
     logout: async () => {
         try {
